@@ -1,7 +1,7 @@
 # OpenGL Draw Stuff
 A very simple OpenGL abstraction header only library made to draw stuff. As of now, it focuses on 2D rendering, but it does support 3D rendering as well.
 
-To know more on how to use this library, you can look into the `tests` folder.
+To know more on how to use this library, you can look into the `tests` folder. When building, be sure to turn the image files into C headers first.
 
 As the programmer using this library, you are responsible to handle dangling pointers.
 
