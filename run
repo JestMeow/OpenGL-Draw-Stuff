@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+cmake -S . -B build -G Ninja \
+    -DGLFW_ROOT="$CXXLIBS/glfw" \
+    -DGLM_ROOT="$CXXLIBS/glm" \
+    -DSTB_ROOT="$CXXLIBS/stb"
+
+cmake --build build
+
+cd build && ctest -V --output-on-failure
+
