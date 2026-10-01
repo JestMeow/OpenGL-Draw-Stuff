@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -132,8 +133,8 @@ int main() {
             glm::vec3(0.f, 0.f, 0.f),
             glm::vec3(0.f, 1.f, 0.f)
         },
-        glm::vec3(-2, 0, 0));
-    
+        glm::vec3(0, 0, 0));
+
     //rectangle.color = glm::vec4(0.f, 1.f, 0.f, 1.f);
     flower.scale *= 4;
 
@@ -141,6 +142,22 @@ int main() {
     flower.set_texture(flower_texture);
 
     GlDrawStuff::Mesh flower_mesh = renderer.upload(flower);
+
+    std::vector<std::unique_ptr<GlDrawStuff::BaseShape>> shapes;
+
+    shapes.emplace_back(
+            std::make_unique<GlDrawStuff::Shape::Quad>(flower)
+            );
+    shapes.emplace_back(
+            std::make_unique<GlDrawStuff::Shape::Quad>(rectangle)
+            );
+
+    auto batch = GlDrawStuff::Batch::make(shapes);
+
+    batch.set_texture(flower_texture);
+
+    GlDrawStuff::Mesh batch_mesh = renderer.upload(batch);
+
 
 
     glEnable(GL_BLEND);
@@ -162,13 +179,14 @@ int main() {
         glDisable(GL_SCISSOR_TEST);
 
 
-        move_rec(window, rectangle);
+        move_rec(window, batch);
 
         renderer.begin();
 
         renderer.draw(triangle, triangle_mesh);
-        renderer.draw(rectangle, rectangle_mesh);
-        renderer.draw(flower, flower_mesh);
+        //renderer.draw(rectangle, rectangle_mesh);
+        //renderer.draw(flower, flower_mesh);
+        renderer.draw(batch, batch_mesh);
 
         renderer.end();
 
