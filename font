@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+cd tests \
+&& rm font_sbmff.h \
+&& xxd -i font.sbmff > font_sbmff.h
+

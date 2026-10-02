@@ -1,0 +1,11 @@
+GLYPH 8 8
+ATLAS 16
+LINE_SPACE 1
+
+DEFAULT 7 5
+.i 3 2
+.I 3 2
+.l 4 3
+.! 3 2
+.@ 8 6
+

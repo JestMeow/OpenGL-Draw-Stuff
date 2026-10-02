@@ -11,5 +11,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+if [[ $1 == 'n' ]]; then
+    build/unit_tests
+    exit 0
+fi
+
 cd build && ctest -V --output-on-failure
 

@@ -15,6 +15,8 @@
 #include "flower_dandelion.h"
 #include "default8.h"
 
+#include "font_sbmff.h"
+
 
 namespace WindowDimensions {
     int width = 600;
@@ -158,17 +160,44 @@ int main() {
     auto batch = GlDrawStuff::Batch::make(shapes);
     batch.set_texture(flower_texture);
     GlDrawStuff::Mesh batch_mesh = renderer.upload(batch);
+    
+    batch.scale *= 2;
+
+
+    // FYI, sbmff stands for Simple Bitmap Font Format. I couldn't think of a better name, so just accept the long file extension... Or don't use the file extension at all.
+    std::string sbmff_content(
+        reinterpret_cast<char*>(font_sbmff), font_sbmff_len
+    );
+
+    std::cout << sbmff_content << '\n';
+
+    auto ballz = GlDrawStuff::Text::create_font(sbmff_content);
+
+    std::cout 
+        << "Glyph Width: " << ballz.glyph_width 
+        << "\nGlyph Heigh: " << ballz.glyph_height 
+        << "\nAtlas Width: " << ballz.atlas_width
+        << "\nDGlyph: " << ballz.default_width << ' ' << ballz.default_advance
+        << '\n';
+
+    for (const auto [key, glyph] : ballz.glyphs) {
+        std::cout << "C: " << key << ' ' << glyph.ch << ' ' << glyph.width << ' ' << glyph.advance << '\n';
+    }
+
 
     
-    std::string text_content = "Hello,\nWorld!\nWOW!!!\n12345@#%^&";
+    std::string text_content = "Hello,\nWorld!\nWOW!!!\n12345@#%^&\niii";
 
     GlDrawStuff::Texture font(default8_png, default8_png_len);
-    auto text = GlDrawStuff::Text::make(text_content, font, 1.f, 1.f);
+    auto text = GlDrawStuff::Text::make(text_content, font, ballz, 1.f, 1.f);
     std::cout << text.get_text() << '\n';
 
     auto text_batch = text.create();
-    text_batch.position.x -= 3;
+    text_batch.position.x -= 5;
+    text_batch.position.y += 2;
+    text_batch.scale *= 1.5;
     GlDrawStuff::Mesh text_batch_mesh = renderer.upload(text_batch);
+
 
 
 
