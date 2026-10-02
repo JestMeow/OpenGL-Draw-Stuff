@@ -1,3 +1,6 @@
+# WORK IN PROGRESS (WIP)
+This project is still yet not ready for a full release.
+
 # OpenGL Draw Stuff
 A very simple OpenGL abstraction header only library made to draw stuff. As of now, it focuses on 2D rendering, but it does support 3D rendering as well.
 

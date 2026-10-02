@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -8,9 +9,11 @@
 #include <GlDrawStuff/shader.hpp>
 #include <GlDrawStuff/shape.hpp>
 #include <GlDrawStuff/texture.hpp>
+#include <GlDrawStuff/text.hpp>
 
 #include "container.h"
 #include "flower_dandelion.h"
+#include "default8.h"
 
 
 namespace WindowDimensions {
@@ -90,7 +93,7 @@ int main() {
     GlDrawStuff::Shader default_shader;
     default_shader.use_default_shader();
     
-    GlDrawStuff::Renderer renderer(1024, 1024, default_shader);
+    GlDrawStuff::Renderer renderer(1024 * 1024, 1024 * 1024, default_shader);
 
 
 
@@ -153,10 +156,19 @@ int main() {
             );
 
     auto batch = GlDrawStuff::Batch::make(shapes);
-
     batch.set_texture(flower_texture);
-
     GlDrawStuff::Mesh batch_mesh = renderer.upload(batch);
+
+    
+    std::string text_content = "Hello,\nWorld!\nWOW!!!\n12345@#%^&";
+
+    GlDrawStuff::Texture font(default8_png, default8_png_len);
+    auto text = GlDrawStuff::Text::make(text_content, font, 1.f, 1.f);
+    std::cout << text.get_text() << '\n';
+
+    auto text_batch = text.create();
+    text_batch.position.x -= 3;
+    GlDrawStuff::Mesh text_batch_mesh = renderer.upload(text_batch);
 
 
 
@@ -183,10 +195,13 @@ int main() {
 
         renderer.begin();
 
-        renderer.draw(triangle, triangle_mesh);
+        //renderer.draw(triangle, triangle_mesh);
         //renderer.draw(rectangle, rectangle_mesh);
         //renderer.draw(flower, flower_mesh);
         renderer.draw(batch, batch_mesh);
+        renderer.draw(text_batch, text_batch_mesh);
+
+
 
         renderer.end();
 
