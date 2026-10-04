@@ -1,3 +1,5 @@
 .cache/
 build/
 tests/*.h
+
+doxygen_docs/

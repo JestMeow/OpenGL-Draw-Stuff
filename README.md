@@ -1,27 +1,25 @@
-# WORK IN PROGRESS (WIP)
-This project is still yet not ready for a full release.
+# OpenGL Draw Stuff (GlDrawStuff)
+A very very simple C++ OpenGL rendering library for drawing simple shapes, textured geometry, and text.
 
-# OpenGL Draw Stuff
-A very simple OpenGL abstraction header only library made to draw stuff. As of now, it focuses on 2D rendering, but it does support 3D rendering as well.
-
-To know more on how to use this library, you can look into the `tests` folder. When building, be sure to turn the image files into C headers first.
-
-As the programmer using this library, you are responsible to handle dangling pointers.
+This library provides a layer of abstraction over OpenGL for managing shaders, textures, geometry, and rendering. It's designed to make basic 2D and 3D rendering easier without completely hiding OpenGL.
 
 ## Features
-- Header-only
-- 2D rendering
-- Basic 3D rendering
-- Shape drawing and transformations
-- Texture loading
+- OpenGL rendering through GLAD
+- GLM based transformations
+- Simple shader management
+- Texture loading from memory using `stb_image`
+- Basic geometric shapes:
+- - Triangles
+- - Quadrilaterals
+- Geometry batching
+- Texture atlas based text rendering
 
-## Dependencies
-- GLM >= 1.1.0
-- stb_image >= 2.30
-- OpenGL 4.6
+## Requirements
+- C++17 or later
+- OpenGL 3.3 or later
 - GLAD
+- GLM
+- `stb_image`
 
-Note that I haven't tested this library with every version of the listed dependencies. Lower versions of the dependencies may work.
-
-This library relies on glm for positions and transformations of shapes. Uses stb for texture imports.
+This library does not create an OpenGL context. An OpenGL context must already exist before creating or using the library's OpenGL objects.
 

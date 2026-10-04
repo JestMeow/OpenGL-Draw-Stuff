@@ -1,7 +1,6 @@
 #ifndef GL_DRAW_STUFF_RENDERER_HPP
 #define GL_DRAW_STUFF_RENDERER_HPP
 
-
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,17 +9,29 @@
 #include <GlDrawStuff/shape.hpp>
 #include <GlDrawStuff/texture.hpp>
 
-
 namespace GlDrawStuff {
-
-
+/**
+ * @brief Represents geometry stored in the renderer's buffers.
+ *
+ * A Mesh does not own GPU resources. It stores the information required
+ * to render a previously uploaded shape using Render::draw().
+ */
 struct Mesh {
     GLsizei index_count;
     GLint base_vertex;
     GLintptr index_offset;
 };
 
-
+/**
+ * @brief Manages OpenGL buffers and renders uploaded shapes.
+ *
+ * Renderer maintains shared vertex, texture coordinates, and index buffers.
+ * Shapes can be uploaded using upload(), which returns a Mesh describing
+ * the uploaded geometry. The returned Mesh can then be passed
+ * to render the shape.
+ *
+ * @note The renderer does NOT own the Shader passed to its constructor.
+ */
 class Renderer {
 private:
     GLintptr m_vertex_cursor = 0;
@@ -35,11 +46,16 @@ public:
     GLuint VAO = 0;
     GLuint EBO = 0;
 
-
     glm::mat4 view = glm::mat4(1.f);
     glm::mat4 projection = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.f, 1.f);
 
-
+    /**
+     * @brief Creates a renderer with preallocated GPU buffers.
+     *
+     * @param vertex_buffer_size Size in bytes of the vertex and texture coordinates buffers.
+     * @param index_buffer_size Size in bytes of the index buffer.
+     * @param shader Shader used when rendering shapes.
+     */
     Renderer(GLsizeiptr vertex_buffer_size, GLsizeiptr index_buffer_size, Shader& shader): m_shader(shader) {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &TEXCOORD_VBO);
@@ -96,19 +112,27 @@ public:
         glBindVertexArray(0);
     }
 
-
+    /**
+     * @brief Upload a shape's geometry to the renderer's GPU buffers.
+     *
+     * The geometry is appended to the existing contents of the renderer's
+     * buffers. The returned Mesh contains the offsets and counts required
+     * to render the uploaded geometry.
+     *
+     * @param shape Shape whose geometry should be uploaded
+     * @return A Mesh describing the uploaded geometry.
+     *
+     * @warning The renderer's buffers must have sufficient remaining capacity
+     * for the shape's vertices, texture coordinates, and indices.
+     */
     Mesh upload(const BaseShape& shape) {
         Geometry geometry = shape.geometry();
 
         Mesh mesh{};
 
         mesh.index_count = static_cast<GLsizei>(geometry.index_count);
-
         mesh.base_vertex = static_cast<GLint>(m_vertex_cursor / sizeof(glm::vec3));
-
         mesh.index_offset = m_index_cursor;
-
-
 
         // Upload vertices
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -140,7 +164,6 @@ public:
             geometry.indices
         );
 
-
         m_vertex_cursor += geometry.vertex_count * sizeof(glm::vec3);
         m_texcoord_cursor += geometry.vertex_count * sizeof(glm::vec2);
         m_index_cursor += geometry.index_count * sizeof(unsigned int);
@@ -148,13 +171,33 @@ public:
         return mesh;
     }
 
-
+    /**
+     * @brief Begins a rendering batch.
+     *
+     * Binds the renderer's vertex array object. Call this before
+     * drawing meshes with draw().
+     */
     void begin() {
         glBindVertexArray(VAO);
     }
-
-
-    void draw(const BaseShape& shape, const Mesh& mesh) {
+    
+    /**
+     * @brief Renders an uploaded shape.
+     *
+     * Condigures the model, view, and projection matrices, binds the shape's
+     * texture when present, sets the shape's color, invokes the supplied
+     * callback, and issues the OpenGL draw call.
+     *
+     * @tparam F Callable type of the callback invoked immediately before
+     * the geometry is drawn
+     *
+     * @param shape Shape containing the transform, color, and optional texture.
+     * @param mesh Mesh returned by upload() corresponding to the shape's geometry.
+     * @param func Callback invoked after render state has been configured and
+     * immediately before the draw call.
+     */
+    template<typename F>
+    void draw(const BaseShape& shape, const Mesh& mesh, F func) {
         m_shader.use();
 
         glm::mat4 model{1.f};
@@ -181,8 +224,6 @@ public:
 
         model = glm::scale(model, shape.scale);
 
-
-
         if (shape.get_texture() != nullptr) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, shape.get_texture()->texture);
@@ -193,12 +234,13 @@ public:
             m_shader.set_int("useTexture", 0);
         }
 
-
         m_shader.set_mat4("model", model);
         m_shader.set_mat4("view", view);
         m_shader.set_mat4("projection", projection);
-        
+    
         m_shader.set_vec4("color", shape.color);
+
+        func();
 
         glDrawElementsBaseVertex(
             GL_TRIANGLES,
@@ -209,8 +251,32 @@ public:
         );
     }
 
+    /**
+     * @brief Renders a shape without a custom draw callback.
+     *
+     * @param shape Shape containing the transform, color, and optional texture.
+     * @param mesh Mesh returned by upload() corresponding to the shape's geometry.
+     */
+    void draw(const BaseShape& shape, const Mesh& mesh) {
+        draw(shape, mesh, [](){});
+    }
+
+    /**
+     * @brief Ends a rendering batch.
+     *
+     * Unbinds the renderer's vertex array object.
+     */
     void end() {
         glBindVertexArray(0);
+    }
+
+    /**
+     * @brief Returns the shader used by the renderer.
+     *
+     * @return Reference to the renderer's shader.
+     */
+    Shader& get_shader() {
+        return m_shader;
     }
 };
 

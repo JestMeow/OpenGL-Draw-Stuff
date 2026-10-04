@@ -2,5 +2,7 @@
 
 cd tests \
 && rm font_sbmff.h \
-&& xxd -i font.sbmff > font_sbmff.h
+&& xxd -i font.sbmff > font_sbmff.h \
+&& rm eden8_sbmff.h \
+&& xxd -i eden8.sbmff > eden8_sbmff.h
 

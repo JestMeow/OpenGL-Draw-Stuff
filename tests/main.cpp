@@ -14,9 +14,11 @@
 #include "container.h"
 #include "flower_dandelion.h"
 #include "default8.h"
+#include "eden8_png.h"
 
 #include "font_sbmff.h"
-
+#include "eden8_sbmff.h"
+#include "glm/ext/vector_float4.hpp"
 
 namespace WindowDimensions {
     int width = 600;
@@ -173,7 +175,7 @@ int main() {
 
     auto ballz = GlDrawStuff::Text::create_font(sbmff_content);
 
-    std::cout 
+    /*std::cout 
         << "Glyph Width: " << ballz.glyph_width 
         << "\nGlyph Heigh: " << ballz.glyph_height 
         << "\nAtlas Width: " << ballz.atlas_width
@@ -182,7 +184,7 @@ int main() {
 
     for (const auto [key, glyph] : ballz.glyphs) {
         std::cout << "C: " << key << ' ' << glyph.ch << ' ' << glyph.width << ' ' << glyph.advance << '\n';
-    }
+    }*/
 
 
     
@@ -197,6 +199,20 @@ int main() {
     text_batch.position.y += 2;
     text_batch.scale *= 1.5;
     GlDrawStuff::Mesh text_batch_mesh = renderer.upload(text_batch);
+
+
+    std::string eden8_sbmff_content(
+        reinterpret_cast<char*>(eden8_sbmff), eden8_sbmff_len
+    );
+
+    auto eden8_font = GlDrawStuff::Text::create_font(eden8_sbmff_content);
+
+    GlDrawStuff::Texture eden8(eden8_png, eden8_png_len);
+    auto eden_text = GlDrawStuff::Text::make(text_content, eden8, eden8_font, 1.f, 1.f);
+    auto eden_text_batch = eden_text.create();
+    eden_text_batch.position = glm::vec3{-6.f, 2.f, 0.f};
+    eden_text_batch.scale *= 1.5;
+    GlDrawStuff::Mesh eden_text_batch_mesh = renderer.upload(eden_text_batch);
 
 
 
@@ -228,7 +244,10 @@ int main() {
         //renderer.draw(rectangle, rectangle_mesh);
         //renderer.draw(flower, flower_mesh);
         renderer.draw(batch, batch_mesh);
-        renderer.draw(text_batch, text_batch_mesh);
+        //renderer.draw(text_batch, text_batch_mesh);
+        renderer.draw(eden_text_batch, eden_text_batch_mesh, [&renderer](){
+            renderer.get_shader().set_vec4("color", glm::vec4{1.f, 0.f, 1.f, 1.f});
+        });
 
 
 
