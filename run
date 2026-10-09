@@ -3,6 +3,7 @@
 cmake -S . -B build -G Ninja \
     -DGLFW_ROOT="$CXXLIBS/glfw" \
     -DGLM_ROOT="$CXXLIBS/glm" \
+    -DCGLM_ROOT="$CLIBS/cglm-0.9.6" \
     -DSTB_ROOT="$CXXLIBS/stb"
 
 cmake --build build

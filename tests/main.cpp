@@ -11,9 +11,9 @@
 #include <GlDrawStuff/texture.hpp>
 #include <GlDrawStuff/text.hpp>
 
-#include "container.h"
+//#include "container.h"
 #include "flower_dandelion.h"
-#include "default8.h"
+//#include "default8.h"
 #include "eden8_png.h"
 
 #include "font_sbmff.h"
@@ -111,7 +111,7 @@ int main() {
 
 
 
-    GlDrawStuff::Texture texture(container_jpg, container_jpg_len, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    //GlDrawStuff::Texture texture(container_jpg, container_jpg_len, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
     auto rectangle = GlDrawStuff::Shape::Quad::make(std::array<glm::vec3, 4>{
             glm::vec3(1.f, 1.f, 0.f),
@@ -125,7 +125,7 @@ int main() {
     rectangle.scale *= 2;
 
 
-    rectangle.set_texture(texture);
+    //rectangle.set_texture(texture);
 
     GlDrawStuff::Mesh rectangle_mesh = renderer.upload(rectangle);
 
@@ -190,6 +190,7 @@ int main() {
     
     std::string text_content = "Hello,\nWorld!\nWOW!!!\n12345@#%^&\niii";
 
+    /*
     GlDrawStuff::Texture font(default8_png, default8_png_len);
     auto text = GlDrawStuff::Text::make(text_content, font, ballz, 1.f, 1.f);
     std::cout << text.get_text() << '\n';
@@ -199,7 +200,7 @@ int main() {
     text_batch.position.y += 2;
     text_batch.scale *= 1.5;
     GlDrawStuff::Mesh text_batch_mesh = renderer.upload(text_batch);
-
+    */
 
     std::string eden8_sbmff_content(
         reinterpret_cast<char*>(eden8_sbmff), eden8_sbmff_len
