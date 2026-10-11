@@ -3,7 +3,6 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <GlDrawStuff/shader.hpp>
 #include <GlDrawStuff/shape.hpp>
@@ -56,61 +55,7 @@ public:
      * @param index_buffer_size Size in bytes of the index buffer.
      * @param shader Shader used when rendering shapes.
      */
-    Renderer(GLsizeiptr vertex_buffer_size, GLsizeiptr index_buffer_size, Shader& shader): m_shader(shader) {
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &TEXCOORD_VBO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-
-        glBindVertexArray(VAO);
-
-        // Vertex buffer
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertex_buffer_size,
-            nullptr,
-            GL_DYNAMIC_DRAW
-        );
-
-        // Pos
-
-        glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(glm::vec3),
-            nullptr
-        );
-
-        glEnableVertexAttribArray(0);
-
-        // Tex
-        glBindBuffer(GL_ARRAY_BUFFER, TEXCOORD_VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertex_buffer_size, nullptr, GL_DYNAMIC_DRAW);
-        glVertexAttribPointer(
-            1,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(glm::vec2),
-            nullptr
-        );
-
-        glEnableVertexAttribArray(1);
-
-        // Index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            index_buffer_size,
-            nullptr,
-            GL_DYNAMIC_DRAW
-        );
-
-        glBindVertexArray(0);
-    }
+    Renderer(GLsizeiptr vertex_buffer_size, GLsizeiptr index_buffer_size, Shader& shader);
 
     /**
      * @brief Upload a shape's geometry to the renderer's GPU buffers.
@@ -125,51 +70,7 @@ public:
      * @warning The renderer's buffers must have sufficient remaining capacity
      * for the shape's vertices, texture coordinates, and indices.
      */
-    Mesh upload(const BaseShape& shape) {
-        Geometry geometry = shape.geometry();
-
-        Mesh mesh{};
-
-        mesh.index_count = static_cast<GLsizei>(geometry.index_count);
-        mesh.base_vertex = static_cast<GLint>(m_vertex_cursor / sizeof(glm::vec3));
-        mesh.index_offset = m_index_cursor;
-
-        // Upload vertices
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-        glBufferSubData(
-            GL_ARRAY_BUFFER,
-            m_vertex_cursor,
-            geometry.vertex_count * sizeof(glm::vec3),
-            geometry.vertices
-        );
-
-        // Upload texture coords
-        glBindBuffer(GL_ARRAY_BUFFER, TEXCOORD_VBO);
-
-        glBufferSubData(
-            GL_ARRAY_BUFFER,
-            m_texcoord_cursor,
-            geometry.vertex_count * sizeof(glm::vec2),
-            geometry.texture_coordinates
-        );
-        
-        // Upload indices        
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-        glBufferSubData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            m_index_cursor,
-            geometry.index_count * sizeof(unsigned int),
-            geometry.indices
-        );
-
-        m_vertex_cursor += geometry.vertex_count * sizeof(glm::vec3);
-        m_texcoord_cursor += geometry.vertex_count * sizeof(glm::vec2);
-        m_index_cursor += geometry.index_count * sizeof(unsigned int);
-
-        return mesh;
-    }
+    Mesh upload(const BaseShape& shape);
 
     /**
      * @brief Begins a rendering batch.
@@ -177,10 +78,7 @@ public:
      * Binds the renderer's vertex array object. Call this before
      * drawing meshes with draw().
      */
-    void begin() {
-        glBindVertexArray(VAO);
-    }
-    
+    void begin();
     /**
      * @brief Renders an uploaded shape.
      *
@@ -197,59 +95,7 @@ public:
      * immediately before the draw call.
      */
     template<typename F>
-    void draw(const BaseShape& shape, const Mesh& mesh, F func) {
-        m_shader.use();
-
-        glm::mat4 model{1.f};
-
-        model = glm::translate(model, shape.position);
-
-        model = glm::rotate(
-            model,
-            shape.orientation.x,
-            glm::vec3(1, 0, 0)
-        );
-
-        model = glm::rotate(
-            model,
-            shape.orientation.y,
-            glm::vec3(0, 1, 0)
-        );
-    
-        model = glm::rotate(
-            model,
-            shape.orientation.z,
-            glm::vec3(0, 0, 1)
-        );
-
-        model = glm::scale(model, shape.scale);
-
-        if (shape.get_texture() != nullptr) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, shape.get_texture()->texture);
-
-            m_shader.set_int("u_Texture", 0);
-            m_shader.set_int("useTexture", 1);
-        } else {
-            m_shader.set_int("useTexture", 0);
-        }
-
-        m_shader.set_mat4("model", model);
-        m_shader.set_mat4("view", view);
-        m_shader.set_mat4("projection", projection);
-    
-        m_shader.set_vec4("color", shape.color);
-
-        func();
-
-        glDrawElementsBaseVertex(
-            GL_TRIANGLES,
-            mesh.index_count,
-            GL_UNSIGNED_INT,
-            reinterpret_cast<void*>(mesh.index_offset),
-            mesh.base_vertex
-        );
-    }
+    void draw(const BaseShape& shape, const Mesh& mesh, F func);
 
     /**
      * @brief Renders a shape without a custom draw callback.
@@ -257,31 +103,78 @@ public:
      * @param shape Shape containing the transform, color, and optional texture.
      * @param mesh Mesh returned by upload() corresponding to the shape's geometry.
      */
-    void draw(const BaseShape& shape, const Mesh& mesh) {
-        draw(shape, mesh, [](){});
-    }
+    void draw(const BaseShape& shape, const Mesh& mesh);
 
     /**
      * @brief Ends a rendering batch.
      *
      * Unbinds the renderer's vertex array object.
      */
-    void end() {
-        glBindVertexArray(0);
-    }
+    void end();
 
     /**
      * @brief Returns the shader used by the renderer.
      *
      * @return Reference to the renderer's shader.
      */
-    Shader& get_shader() {
-        return m_shader;
-    }
+    Shader& get_shader();
 };
 
+template<typename F>
+inline void Renderer::draw(const BaseShape& shape, const Mesh& mesh, F func) {
+    m_shader.use();
 
+    glm::mat4 model{1.f};
+
+    model = glm::translate(model, shape.position);
+
+    model = glm::rotate(
+        model,
+        shape.orientation.x,
+        glm::vec3(1, 0, 0)
+    );
+
+    model = glm::rotate(
+        model,
+        shape.orientation.y,
+        glm::vec3(0, 1, 0)
+    );
+
+    model = glm::rotate(
+        model,
+        shape.orientation.z,
+        glm::vec3(0, 0, 1)
+    );
+
+    model = glm::scale(model, shape.scale);
+
+    if (shape.get_texture() != nullptr) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, shape.get_texture()->texture);
+
+        m_shader.set_int("u_Texture", 0);
+        m_shader.set_int("useTexture", 1);
+    } else {
+        m_shader.set_int("useTexture", 0);
+    }
+
+    m_shader.set_mat4("model", model);
+    m_shader.set_mat4("view", view);
+    m_shader.set_mat4("projection", projection);
+
+    m_shader.set_vec4("color", shape.color);
+
+    func();
+
+    glDrawElementsBaseVertex(
+        GL_TRIANGLES,
+        mesh.index_count,
+        GL_UNSIGNED_INT,
+        reinterpret_cast<void*>(mesh.index_offset),
+        mesh.base_vertex
+    );
 }
 
+}
 
 #endif // !GL_DRAW_STUFF_RENDERER_HPP

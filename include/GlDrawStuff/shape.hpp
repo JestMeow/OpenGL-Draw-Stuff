@@ -8,7 +8,6 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace GlDrawStuff {
 
@@ -98,9 +97,7 @@ public:
      *
      * @param s Shader to associate with the shape.
      */
-    void set_shader(Shader& s) & {
-        m_shader = &s;
-    }
+    void set_shader(Shader& s) &;
     /**
      * @brief Prevents assigning a shader to a temporary shape.
      */
@@ -114,9 +111,7 @@ public:
      *
      * @param t Texture to associate with the shape.
      */
-    void set_texture(Texture& t) & {
-        m_texture = &t;
-    }
+    void set_texture(Texture& t) &;
     /**
      * @brief Prevents assigning a texture to a temporary shape.
      */
@@ -127,9 +122,7 @@ public:
      *
      * @param c New RGBA color.
      */
-    void set_color(glm::vec4 c) {
-        color = c;
-    }
+    void set_color(glm::vec4 c);
 
     /**
      * @brief Gets the texture assigned to the shape.
@@ -137,9 +130,7 @@ public:
      * @return Non owning pointer to the assigned texture, or nullptr
      * if no texture has been assigned.
      */
-    Texture* get_texture() const {
-        return m_texture;
-    }
+    Texture* get_texture() const;
 };
 
 /**
@@ -169,12 +160,7 @@ namespace Shape {
          * @param pos Initial position of the triangle.
          * @return A newly constructed triangle.
          */
-        static Triangle make(std::array<glm::vec3, 3> verts, glm::vec3 pos = {0.f, 0.f, 0.f}) {
-            Triangle t;
-            t.vertices = verts;
-            t.position = pos;
-            return t;
-        }
+        static Triangle make(std::array<glm::vec3, 3> verts, glm::vec3 pos = {0.f, 0.f, 0.f});
 
         /**
          * @brief Returns the triangle's geometry.
@@ -182,16 +168,7 @@ namespace Shape {
          * @return Geometry referencing the triangle's vertex,
          * texture coordinates, and index data.
          */
-        Geometry geometry() const override {
-            return {
-                vertices.data(),
-                static_cast<GLsizei>(vertices.size()),
-                texture_coordinate.data(),
-                3,
-                indices.data(),
-                static_cast<GLsizei>(indices.size())
-            };
-        }
+        Geometry geometry() const override;
     };
 
     /**
@@ -218,12 +195,7 @@ namespace Shape {
          * @param pos Initial position of the quad.
          * @return A newly constructed quad.
          */
-        static Quad make(std::array<glm::vec3, 4> verts, glm::vec3 pos = {0.f, 0.f, 0.f}){
-            Quad q;
-            q.vertices = verts;
-            q.position = pos;
-            return q;
-        }
+        static Quad make(std::array<glm::vec3, 4> verts, glm::vec3 pos = {0.f, 0.f, 0.f});
 
         /**
          * @brief Returns the quad's geometry.
@@ -231,16 +203,7 @@ namespace Shape {
          * @return Geometry referencing the quad's vertex,
          * texture coordinates, and index data.
          */
-        Geometry geometry() const override {
-            return {
-                vertices.data(),
-                static_cast<GLsizei>(vertices.size()),
-                texture_coordinate.data(),
-                4,
-                indices.data(),
-                static_cast<GLsizei>(indices.size())
-            };
-        }
+        Geometry geometry() const override;
     };
 }
 
@@ -288,54 +251,7 @@ public:
      * @param pos Initial position of the resulting batch.
      * @return A newly constructed Batch containing the combined geometry.
      */
-    static Batch make(const std::vector<std::unique_ptr<BaseShape>>& shapes, glm::vec3 pos = {0.f, 0.f, 0.f}) {
-        Batch b;
-        b.position = pos;
-
-        for (const auto& shape : shapes) {
-            Geometry g = shape->geometry();
-
-            glm::mat4 model{1.f};
-            model = glm::translate(model, shape->position);
-
-            model = glm::rotate(
-                model,
-                shape->orientation.x,
-                glm::vec3(1, 0, 0)
-            );
-
-            model = glm::rotate(
-                model,
-                shape->orientation.y,
-                glm::vec3(0, 1, 0)
-            );
-
-            model = glm::rotate(
-                model,
-                shape->orientation.z,
-                glm::vec3(0, 0, 1)
-            );
-
-            model = glm::scale(model, shape->scale);
-
-            const unsigned int vertex_offset = static_cast<unsigned int>(b.vertices.size());
-
-            for (GLsizei i = 0; i < g.vertex_count; ++i) {
-                glm::vec4 transformed = model * glm::vec4(g.vertices[i], 1.0f);
-
-                b.vertices.push_back(glm::vec3(transformed));
-            }
-
-            for (GLsizei i = 0; i < g.texture_coordinate_count; ++i) {
-                b.texture_coordinate.push_back(g.texture_coordinates[i]);
-            }
-
-            for (GLsizei i = 0; i < g.index_count; ++i) {
-                b.indices.push_back(g.indices[i] + vertex_offset);
-            }
-        }
-        return b;
-    }
+    static Batch make(const std::vector<std::unique_ptr<BaseShape>>& shapes, glm::vec3 pos = {0.f, 0.f, 0.f});
 
     /**
      * @brief Returns the combined geometry of the batch.
@@ -343,16 +259,7 @@ public:
      * @return Geometry referencing to the batch's vertex,
      * texture coordinate, and index arrays.
      */
-    Geometry geometry() const override {
-        return {
-            vertices.data(),
-            static_cast<GLsizei>(vertices.size()),
-            texture_coordinate.data(),
-            static_cast<GLsizei>(texture_coordinate.size()),
-            indices.data(),
-            static_cast<GLsizei>(indices.size())
-        };
-    }
+    Geometry geometry() const override;
 };
 
 }

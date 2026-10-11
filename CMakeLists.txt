@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(GlDrawStuff)
+project(GlDrawStuff LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,19 +25,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 set(VENDOR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor" CACHE PATH "Path to vendor")
 set(GLFW_ROOT "" CACHE PATH "Path to GLFW root")
 set(GLM_ROOT "" CACHE PATH "Path to GLM root")
-
-set(CGLM_ROOT "" CACHE PATH "Path to CGLM root")
-
 set(STB_ROOT "" CACHE PATH "Path to STB root")
 
 
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE ${GLM_ROOT})
-
-
-add_library(cglm INTERFACE)
-target_include_directories(cglm INTERFACE ${CGLM_ROOT}/include)
-
 
 add_library(glad STATIC ${VENDOR_PATH}/glad/src/glad.c)
 target_include_directories(glad PUBLIC ${VENDOR_PATH}/glad/include)
@@ -68,9 +60,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     glfw
     glad
     glm
-
-    cglm
-
     stb
 )
 
@@ -81,7 +70,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     enable_testing()
 
     add_executable(unit_tests
-        tests/main.c
+        tests/main.cpp
     )
 
     target_link_libraries(unit_tests PRIVATE ${PROJECT_NAME})
