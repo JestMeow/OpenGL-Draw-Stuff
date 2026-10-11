@@ -13,7 +13,7 @@
 
 //#include "container.h"
 #include "flower_dandelion.h"
-//#include "default8.h"
+#include "default8.h"
 #include "eden8_png.h"
 
 #include "font_sbmff.h"
@@ -163,7 +163,7 @@ int main() {
     batch.set_texture(flower_texture);
     GlDrawStuff::Mesh batch_mesh = renderer.upload(batch);
     
-    batch.scale *= 2;
+    batch.scale *= 2.2;
 
 
     // FYI, sbmff stands for Simple Bitmap Font Format. I couldn't think of a better name, so just accept the long file extension... Or don't use the file extension at all.
@@ -188,19 +188,16 @@ int main() {
 
 
     
-    std::string text_content = "Hello,\nWorld!\nWOW!!!\n12345@#%^&\niii";
 
-    /*
     GlDrawStuff::Texture font(default8_png, default8_png_len);
-    auto text = GlDrawStuff::Text::make(text_content, font, ballz, 1.f, 1.f);
+    auto text = GlDrawStuff::Text::make("Hiiii! woah", font, ballz, 1.f, 1.f);
     std::cout << text.get_text() << '\n';
 
     auto text_batch = text.create();
-    text_batch.position.x -= 5;
-    text_batch.position.y += 2;
+    text_batch.position.x -= 3;
+    text_batch.position.y += 5;
     text_batch.scale *= 1.5;
     GlDrawStuff::Mesh text_batch_mesh = renderer.upload(text_batch);
-    */
 
     std::string eden8_sbmff_content(
         reinterpret_cast<char*>(eden8_sbmff), eden8_sbmff_len
@@ -208,11 +205,13 @@ int main() {
 
     auto eden8_font = GlDrawStuff::Text::create_font(eden8_sbmff_content);
 
+    std::string text_content = "Hello,\nWorld!\nWOW!!!\n12345@#%^&\niii";
+
     GlDrawStuff::Texture eden8(eden8_png, eden8_png_len);
     auto eden_text = GlDrawStuff::Text::make(text_content, eden8, eden8_font, 1.f, 1.f);
     auto eden_text_batch = eden_text.create();
-    eden_text_batch.position = glm::vec3{-6.f, 2.f, 0.f};
-    eden_text_batch.scale *= 1.5;
+    eden_text_batch.position = glm::vec3{-8.f, 2.f, 0.f};
+    eden_text_batch.scale *= 1.6;
     GlDrawStuff::Mesh eden_text_batch_mesh = renderer.upload(eden_text_batch);
 
 
@@ -246,7 +245,9 @@ int main() {
         //renderer.draw(flower, flower_mesh);
         renderer.draw(batch, batch_mesh);
         //renderer.draw(text_batch, text_batch_mesh);
-        renderer.draw(eden_text_batch, eden_text_batch_mesh, [&renderer](){
+        renderer.draw(eden_text_batch, eden_text_batch_mesh);
+
+        renderer.draw(text_batch, text_batch_mesh, [&renderer](){
             renderer.get_shader().set_vec4("color", glm::vec4{1.f, 0.f, 1.f, 1.f});
         });
 

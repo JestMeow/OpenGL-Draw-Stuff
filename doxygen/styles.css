@@ -1,0 +1,10 @@
+:root {
+    --nav-gradient-image: none !important;
+    --nav-gradient-hover-image: none !important;
+    --nav-gradient-active-image: none !important;
+}
+
+.sm-dox, .sm-dox a, .sm-dox a:hover, .sm-dox a:active, .sm-dox a:focus {
+    background-image: none !important;
+}
+
